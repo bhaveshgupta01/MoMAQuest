@@ -1,26 +1,95 @@
+/* ── Google Fonts — must precede all other rules ── */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ── Design tokens (Tailwind v4 @theme) ── */
+@theme {
+  /* Palette */
+  --color-primary:            hsl(345 48% 28%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary:          hsl(348 32% 92%);
+  --color-secondary-foreground: hsl(345 48% 28%);
+  --color-background:         hsl(0 0% 100%);
+  --color-foreground:         hsl(210 11% 15%);
+  --color-muted:              hsl(40 12% 96%);
+  --color-muted-foreground:   hsl(210 6% 45%);
+  --color-accent:             hsl(160 38% 22%);
+  --color-accent-foreground:  hsl(0 0% 100%);
+  --color-border:             hsl(220 9% 91%);
+  --color-input:              hsl(220 9% 91%);
+  --color-ring:               hsl(345 48% 28%);
+  --color-destructive:        hsl(4 68% 48%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-card:               hsl(0 0% 100%);
+  --color-card-foreground:    hsl(210 11% 15%);
+  --color-ink:                hsl(210 11% 15%);
+  --color-blush:              hsl(348 32% 92%);
+  --color-forest:             hsl(160 38% 22%);
+
+  /* Typography */
+  --font-display: 'Instrument Serif', serif;
+  --font-body:    'DM Sans', sans-serif;
+
+  /* Radius */
+  --radius-lg: 0.75rem;
+  --radius-md: calc(0.75rem - 2px);
+  --radius-sm: calc(0.75rem - 4px);
+
+  /* Named animations */
+  --animate-fade-in-up:    fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  --animate-pulse-dot:     pulse-dot 1.5s infinite;
+  --animate-gentle-float:  gentleFloat 7s ease-in-out infinite;
+  --animate-xp-toast:      xp-toast 1.8s ease forwards;
+  --animate-ping-slow:     ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ── Keyframes ── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
 }
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50%       { transform: translateY(-14px) rotate(calc(var(--r, 0deg) + 1.5deg)); }
+}
+
+@keyframes ping-slow {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes xp-toast {
+  0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.85); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  80%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -70%) scale(0.9); }
+}
+
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: hsl(0 0% 100%);
+  color: hsl(210 11% 15%);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ── Utility classes ── */
+.font-display { font-family: var(--font-display); }
+.font-body    { font-family: var(--font-body); }
+
+.animate-fade-in-up   { animation: var(--animate-fade-in-up); }
+.animate-pulse-dot    { animation: var(--animate-pulse-dot); }
+.animate-gentle-float { animation: var(--animate-gentle-float); }
+.animate-xp-toast     { animation: var(--animate-xp-toast); }
+
+/* Spyglass cursor */
+.cursor-crosshair { cursor: crosshair; }
