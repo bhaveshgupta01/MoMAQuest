@@ -41,6 +41,8 @@ function sanitiseAndParse<T>(raw: string): T {
   let text = raw
     .replace(/[\u201c\u201d]/g, '"')
     .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u2013\u2014]/g, "-") // em/en dashes
+    .replace(/[\u2026]/g, "...")     // ellipsis
     .trim();
 
   // Strip markdown code fences if present
@@ -56,7 +58,25 @@ function sanitiseAndParse<T>(raw: string): T {
     if (end > start) text = text.slice(start, end + 1);
   }
 
-  return JSON.parse(text) as T;
+  // Try direct parse first
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    // If it's a truncated array, try to recover complete objects from it
+    if (text.trimStart().startsWith("[")) {
+      try {
+        // Find the last complete object by looking for the last "},"  or "}" before a truncation
+        const lastComplete = text.lastIndexOf("},");
+        if (lastComplete > 0) {
+          const recovered = text.slice(0, lastComplete + 1) + "]";
+          return JSON.parse(recovered) as T;
+        }
+      } catch {
+        // Recovery also failed — rethrow original
+      }
+    }
+    throw new SyntaxError(`JSON parse failed. First 200 chars: ${text.slice(0, 200)}`);
+  }
 }
 
 // JSON-mode generation — used by quest, challenges, art-dna routes

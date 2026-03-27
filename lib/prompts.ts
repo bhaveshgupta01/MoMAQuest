@@ -6,16 +6,12 @@ import { MoMAObject, MoMADetailedObject, UserPreferences, FloorCrowdSummary, Cha
 export const PAINTING_POOL_SYSTEM = `You are a MoMA collection expert with deep knowledge of every artwork in the Museum of Modern Art, New York. Return ONLY valid JSON — no markdown, no backticks, no preamble.`;
 
 export function buildPaintingPoolPrompt(count: number): string {
-  return `Return a JSON array of ${count} famous paintings from MoMA's permanent collection. Diverse mix across Floors 2–6.
+  return `Return a JSON array of ${count} MoMA paintings. Each object has exactly these fields:
+{"objectID":number,"title":string,"displayName":string,"dated":string,"medium":string,"department":"Painting & Sculpture","classification":"Painting","onView":1,"currentLocation":string,"thumbnail":"","provenance":"","objectNumber":"","accessionDate":"","objectStatusID":1,"imageID":"","lastModifiedDate":"","alphaSort":string,"role":"Artist","artistID":number,"creditLine":"","dimensions":"","dateBegin":number,"dateEnd":number,"fullImage":"","imageID":""}
 
-Each object has ONLY these fields (no extras):
-{"objectID":number,"title":string,"displayName":string,"dated":string,"medium":string,"department":"Painting & Sculpture","classification":"Painting","onView":1,"currentLocation":string,"thumbnail":"","description":string}
+Known MoMA objectIDs to include: 79802 (The Starry Night, Van Gogh, Gallery 703 Floor 5), 79018 (The Persistence of Memory, Dali, Gallery 706 Floor 5), 79766 (Les Demoiselles d Avignon, Picasso, Gallery 501 Floor 5), 78455 (Christinas World, Wyeth, Gallery 630 Floor 4), 79809 (Gold Marilyn Monroe, Warhol, Gallery 407 Floor 4), 78682 (Broadway Boogie Woogie, Mondrian, Gallery 720 Floor 5), 78386 (One Number 31, Pollock, Gallery 620 Floor 4), 78389 (The Red Studio, Matisse, Gallery 501 Floor 5), 80220 (Water Lilies, Monet, Gallery 710 Floor 5), 78984 (I and the Village, Chagall, Gallery 511 Floor 5), 79588 (Drowning Girl, Lichtenstein, Gallery 419 Floor 4), 78805 (The Treachery of Images, Magritte, Gallery 511 Floor 5), 80394 (White on White, Malevich, Gallery 507 Floor 5), 79250 (Vir Heroicus Sublimis, Newman, Gallery 621 Floor 4), 79600 (Woman I, de Kooning, Gallery 620 Floor 4).
 
-- objectID: real MoMA ID (79802=Starry Night, 79018=Persistence of Memory, 79766=Les Demoiselles d'Avignon, 78455=Christina's World, 79809=Gold Marilyn Monroe, 78682=Broadway Boogie Woogie, 78386=One:Number 31 Pollock, 78389=Red Studio Matisse, 80220=Water Lilies Monet, 78984=I and the Village Chagall, 79588=Drowning Girl Lichtenstein, 78805=Treachery of Images Magritte, 79315=Birth of the World Miró, 80394=White on White Malevich, 79250=Vir Heroicus Sublimis Newman, 79600=Woman I de Kooning, 79070=Three Musicians Picasso)
-- currentLocation: "Gallery NNN, Floor N"
-- description: one short sentence
-
-Return ONLY the JSON array. No markdown, no explanation.`;
+Fill remaining slots with other famous MoMA paintings you know. Spread across floors. Return ONLY valid JSON array, no markdown.`;
 }
 
 export const QUEST_SYSTEM = `You are an expert MoMA curator and visitor experience designer. Your job is to analyze a visitor's preferences and create a personalized museum quest that:
