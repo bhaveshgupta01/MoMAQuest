@@ -3,6 +3,43 @@ import { MoMAObject, MoMADetailedObject, UserPreferences, FloorCrowdSummary, Cha
 
 // ─── System prompts ────────────────────────────────────────────────────────
 
+export const PAINTING_POOL_SYSTEM = `You are a MoMA collection expert with deep knowledge of every artwork in the Museum of Modern Art, New York. Return ONLY valid JSON — no markdown, no backticks, no preamble.`;
+
+export function buildPaintingPoolPrompt(count: number): string {
+  return `Generate a JSON array of exactly ${count} paintings from the permanent MoMA collection that are typically on permanent display. Choose a diverse mix: iconic masterpieces, abstract expressionism, pop art, surrealism, cubism, and a few underrated gems across different floors.
+
+For each painting return this exact structure:
+{
+  "objectID": number,         // real MoMA collection objectID (e.g. 79802 for Starry Night)
+  "title": string,
+  "displayName": string,      // artist full name
+  "dated": string,            // e.g. "1889" or "1950–52"
+  "dateBegin": number,
+  "dateEnd": number,
+  "medium": string,
+  "dimensions": string,
+  "department": string,       // e.g. "Painting & Sculpture"
+  "classification": "Painting",
+  "onView": 1,
+  "currentLocation": string,  // e.g. "Gallery 703, Floor 5"
+  "thumbnail": string,        // leave empty string ""
+  "fullImage": string,        // leave empty string ""
+  "description": string,      // 1–2 sentence visual description
+  "creditLine": string,
+  "provenance": "",
+  "objectNumber": "",
+  "accessionDate": "",
+  "objectStatusID": 1,
+  "imageID": "",
+  "lastModifiedDate": "",
+  "alphaSort": string,        // "LastName, FirstName"
+  "role": "Artist",
+  "artistID": number
+}
+
+Return an array of exactly ${count} objects. Spread across Floors 2–6. Include works by Van Gogh, Dalí, Picasso, Matisse, Warhol, Pollock, de Kooning, Lichtenstein, Mondrian, Magritte, Miró, Malevich, Monet, Cézanne, Kandinsky, Chagall, de Chirico, Newman, Wyeth, Johns, Basquiat, and others.`;
+}
+
 export const QUEST_SYSTEM = `You are an expert MoMA curator and visitor experience designer. Your job is to analyze a visitor's preferences and create a personalized museum quest that:
 1. Fights museum fatigue by limiting stops to 5-7 paintings
 2. Creates a logical walking route that minimizes backtracking between floors

@@ -1,4 +1,6 @@
 import { MoMAObject, MoMADetailedObject } from "./types";
+import { callClaude } from "./claude";
+import { PAINTING_POOL_SYSTEM, buildPaintingPoolPrompt } from "./prompts";
 
 const MOMA_API_BASE = "https://api.moma.org/api";
 const MOMA_TOKEN = process.env.MOMA_API_TOKEN;
@@ -95,45 +97,65 @@ const SEED_OBJECT_IDS = [
   79459,  // Portrait of a Young Woman — Modigliani
 ];
 
-export async function getRandomOnView(count = 80): Promise<MoMAObject[]> {
-  // Fire random calls + fetch each seed ID in parallel for guaranteed variety
+async function fetchFromMoMAApi(count: number): Promise<MoMAObject[]> {
   const randomCalls = Array.from({ length: count }, () =>
-    momaFetch("/objects/random?onview=1")
+    momaFetch("/objects/random?onview=1").catch(() => null)
   );
   const seedCalls = SEED_OBJECT_IDS.map((id) =>
     momaFetch(`/objects/${id}`).catch(() => null)
   );
 
-  const [randomResults, seedResults] = await Promise.all([
-    Promise.allSettled(randomCalls),
-    Promise.allSettled(seedCalls),
+  const [randomResults, seedResults] = await Promise.allSettled([
+    Promise.all(randomCalls),
+    Promise.all(seedCalls),
   ]);
 
-  const fromRandom = randomResults
-    .filter((r): r is PromiseFulfilledResult<unknown> => r.status === "fulfilled")
-    .flatMap((r) => ((r.value as { objects?: MoMAObject[] })?.objects ?? []));
+  const fromRandom = (randomResults.status === "fulfilled" ? randomResults.value : [])
+    .filter(Boolean)
+    .flatMap((r) => ((r as { objects?: MoMAObject[] })?.objects ?? []));
 
-  const fromSeeds = seedResults
-    .filter((r): r is PromiseFulfilledResult<unknown> => r.status === "fulfilled")
-    .flatMap((r) => ((r.value as { objects?: MoMAObject[] })?.objects ?? []));
+  const fromSeeds = (seedResults.status === "fulfilled" ? seedResults.value : [])
+    .filter(Boolean)
+    .flatMap((r) => ((r as { objects?: MoMAObject[] })?.objects ?? []));
 
-  // Seeds: only include if they are confirmed on view with a usable image
   const validSeeds = fromSeeds.filter(
-    (o: MoMAObject) => o.thumbnail && o.currentLocation && o.onView === 1
+    (o: MoMAObject) => o.currentLocation && o.onView === 1
   );
 
   const all = [
-    ...validSeeds,  // seeds first so Gemini always sees the iconic works
-    ...fromRandom.filter((o: MoMAObject) => o.thumbnail && o.currentLocation),
+    ...validSeeds,
+    ...fromRandom.filter((o: MoMAObject) => o.currentLocation),
   ];
 
-  // Deduplicate by objectID
   const seen = new Set<number>();
   return all.filter((o: MoMAObject) => {
     if (seen.has(o.objectID)) return false;
     seen.add(o.objectID);
     return true;
   });
+}
+
+async function fetchFromGemini(count: number): Promise<MoMAObject[]> {
+  console.log("[moma-api] MoMA API unavailable — generating painting pool via Gemini");
+  const paintings = await callClaude<MoMAObject[]>({
+    system: PAINTING_POOL_SYSTEM,
+    messages: [{ role: "user", content: buildPaintingPoolPrompt(count) }],
+    maxTokens: 8000,
+    thinkingBudget: 1024,
+  });
+  return Array.isArray(paintings) ? paintings : [];
+}
+
+export async function getRandomOnView(count = 80): Promise<MoMAObject[]> {
+  // Try MoMA API first; fall back to Gemini-generated pool if API is unavailable
+  const apiResults = await fetchFromMoMAApi(count);
+
+  if (apiResults.length >= 10) {
+    return apiResults;
+  }
+
+  // MoMA API returned too few results — use Gemini to generate the pool
+  return fetchFromGemini(30);
 }
 
 export async function getObjectDetails(
