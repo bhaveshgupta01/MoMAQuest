@@ -2,22 +2,50 @@ import { NextRequest, NextResponse } from "next/server";
 import { getObjectDetails, getImageAsBase64 } from "@/lib/moma-api";
 import { callClaude, imageBlock } from "@/lib/claude";
 import { VISUAL_HUNT_SYSTEM, buildVisualHuntUserMessage } from "@/lib/prompts";
-import { VisualHuntChallenge } from "@/lib/types";
+import { VisualHuntChallenge, MoMADetailedObject } from "@/lib/types";
 
 export async function POST(req: NextRequest) {
   try {
-    const { objectId }: { objectId: number } = await req.json();
+    const body = await req.json();
+    const { objectId, stopMeta }: {
+      objectId: number;
+      stopMeta?: { title: string; artist: string; year: string; medium?: string; location?: string };
+    } = body;
 
     if (!objectId) {
       return NextResponse.json({ error: "Missing objectId" }, { status: 400 });
     }
 
-    const artwork = await getObjectDetails(objectId);
+    // Try to get full MoMA details; fall back to stopMeta if it fails
+    let artwork: MoMADetailedObject | null = null;
+    try {
+      artwork = await getObjectDetails(objectId);
+    } catch {
+      // MoMA API unavailable — will use stopMeta fallback below
+    }
+
+    // Build a synthetic artwork object from stopMeta when MoMA API is unavailable
+    if (!artwork && stopMeta) {
+      artwork = {
+        objectID: objectId,
+        title: stopMeta.title,
+        displayName: stopMeta.artist,
+        dated: stopMeta.year,
+        medium: stopMeta.medium ?? "",
+        dimensions: "",
+        department: "Painting & Sculpture",
+        description: "",
+        provenance: "",
+        creditLine: "",
+        currentLocation: stopMeta.location ?? "",
+      } as unknown as MoMADetailedObject;
+    }
+
     if (!artwork) {
       return NextResponse.json({ error: "Artwork not found" }, { status: 404 });
     }
 
-    // Fetch painting image for Claude Vision — critical for accurate object detection
+    // Fetch painting image for Gemini Vision — non-fatal if it fails
     const imageUrl = artwork.fullImage || artwork.thumbnail;
     const base64 = imageUrl ? await getImageAsBase64(imageUrl) : null;
 

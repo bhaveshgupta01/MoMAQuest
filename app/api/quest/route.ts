@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
     // Fetch artworks + crowd data in parallel
     const [artworks, crowdSummary] = await Promise.all([
-      getRandomOnView(30),
+      getRandomOnView(80),
       getFloorCrowdCounts(),
     ]);
 

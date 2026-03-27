@@ -58,7 +58,16 @@ export default function PaintingStopPage({
         const r = await fetch("/api/challenges", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ objectId: id }),
+          body: JSON.stringify({
+            objectId: id,
+            // Send stop metadata as fallback when MoMA API is unavailable
+            stopMeta: stop ? {
+              title: stop.title,
+              artist: stop.artist,
+              year: stop.year,
+              location: stop.currentLocation,
+            } : undefined,
+          }),
         });
         const d = await r.json();
         if (d.hunt) setHunt(d.hunt);
@@ -162,22 +171,22 @@ export default function PaintingStopPage({
       )}
 
       {/* Score + streak bar */}
-      <div className="px-5 py-3 flex items-center justify-between border-b border-border bg-muted/30">
+      <div className="px-5 py-3 flex items-center justify-between border-b border-border bg-muted/30" suppressHydrationWarning>
         <div>
           <p className="text-xs text-muted-foreground">Total score</p>
-          <p className="font-display text-xl text-primary">{state.totalScore} pts</p>
+          <p className="font-display text-xl text-primary" suppressHydrationWarning>{state.totalScore} pts</p>
         </div>
         <div className="flex gap-4 items-center">
           {state.visitCount > 1 && (
             <div className="text-right">
               <p className="text-xs text-muted-foreground">All-time</p>
-              <p className="text-sm font-semibold text-accent">{state.allTimeScore} pts</p>
+              <p className="text-sm font-semibold text-accent" suppressHydrationWarning>{state.allTimeScore} pts</p>
             </div>
           )}
           {state.streak >= 2 && (
             <div className="text-right">
               <p className="text-xs text-muted-foreground">Streak</p>
-              <p className="text-xl font-black text-orange-500">🔥 ×{state.streak}</p>
+              <p className="text-xl font-black text-orange-500" suppressHydrationWarning>🔥 ×{state.streak}</p>
             </div>
           )}
         </div>
