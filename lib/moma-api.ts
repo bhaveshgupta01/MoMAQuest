@@ -140,11 +140,13 @@ async function fetchFromGemini(count: number): Promise<MoMAObject[]> {
   const paintings = await callClaude<MoMAObject[]>({
     system: PAINTING_POOL_SYSTEM,
     messages: [{ role: "user", content: buildPaintingPoolPrompt(count) }],
-    maxTokens: 8000,
-    thinkingBudget: 1024,
+    maxTokens: 12000,
+    thinkingBudget: 0,
   });
   return Array.isArray(paintings) ? paintings : [];
 }
+
+
 
 export async function getRandomOnView(count = 80): Promise<MoMAObject[]> {
   // Try MoMA API first; fall back to Gemini-generated pool if API is unavailable
@@ -155,7 +157,7 @@ export async function getRandomOnView(count = 80): Promise<MoMAObject[]> {
   }
 
   // MoMA API returned too few results — use Gemini to generate the pool
-  return fetchFromGemini(30);
+  return fetchFromGemini(20);
 }
 
 export async function getObjectDetails(

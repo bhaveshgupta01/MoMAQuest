@@ -6,38 +6,16 @@ import { MoMAObject, MoMADetailedObject, UserPreferences, FloorCrowdSummary, Cha
 export const PAINTING_POOL_SYSTEM = `You are a MoMA collection expert with deep knowledge of every artwork in the Museum of Modern Art, New York. Return ONLY valid JSON — no markdown, no backticks, no preamble.`;
 
 export function buildPaintingPoolPrompt(count: number): string {
-  return `Generate a JSON array of exactly ${count} paintings from the permanent MoMA collection that are typically on permanent display. Choose a diverse mix: iconic masterpieces, abstract expressionism, pop art, surrealism, cubism, and a few underrated gems across different floors.
+  return `Return a JSON array of ${count} famous paintings from MoMA's permanent collection. Diverse mix across Floors 2–6.
 
-For each painting return this exact structure:
-{
-  "objectID": number,         // real MoMA collection objectID (e.g. 79802 for Starry Night)
-  "title": string,
-  "displayName": string,      // artist full name
-  "dated": string,            // e.g. "1889" or "1950–52"
-  "dateBegin": number,
-  "dateEnd": number,
-  "medium": string,
-  "dimensions": string,
-  "department": string,       // e.g. "Painting & Sculpture"
-  "classification": "Painting",
-  "onView": 1,
-  "currentLocation": string,  // e.g. "Gallery 703, Floor 5"
-  "thumbnail": string,        // leave empty string ""
-  "fullImage": string,        // leave empty string ""
-  "description": string,      // 1–2 sentence visual description
-  "creditLine": string,
-  "provenance": "",
-  "objectNumber": "",
-  "accessionDate": "",
-  "objectStatusID": 1,
-  "imageID": "",
-  "lastModifiedDate": "",
-  "alphaSort": string,        // "LastName, FirstName"
-  "role": "Artist",
-  "artistID": number
-}
+Each object has ONLY these fields (no extras):
+{"objectID":number,"title":string,"displayName":string,"dated":string,"medium":string,"department":"Painting & Sculpture","classification":"Painting","onView":1,"currentLocation":string,"thumbnail":"","description":string}
 
-Return an array of exactly ${count} objects. Spread across Floors 2–6. Include works by Van Gogh, Dalí, Picasso, Matisse, Warhol, Pollock, de Kooning, Lichtenstein, Mondrian, Magritte, Miró, Malevich, Monet, Cézanne, Kandinsky, Chagall, de Chirico, Newman, Wyeth, Johns, Basquiat, and others.`;
+- objectID: real MoMA ID (79802=Starry Night, 79018=Persistence of Memory, 79766=Les Demoiselles d'Avignon, 78455=Christina's World, 79809=Gold Marilyn Monroe, 78682=Broadway Boogie Woogie, 78386=One:Number 31 Pollock, 78389=Red Studio Matisse, 80220=Water Lilies Monet, 78984=I and the Village Chagall, 79588=Drowning Girl Lichtenstein, 78805=Treachery of Images Magritte, 79315=Birth of the World Miró, 80394=White on White Malevich, 79250=Vir Heroicus Sublimis Newman, 79600=Woman I de Kooning, 79070=Three Musicians Picasso)
+- currentLocation: "Gallery NNN, Floor N"
+- description: one short sentence
+
+Return ONLY the JSON array. No markdown, no explanation.`;
 }
 
 export const QUEST_SYSTEM = `You are an expert MoMA curator and visitor experience designer. Your job is to analyze a visitor's preferences and create a personalized museum quest that:
